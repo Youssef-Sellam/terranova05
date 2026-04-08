@@ -1,0 +1,159 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+  <meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>Accesso — Prenotazione Laboratori</title>
+  <link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+  <style>
+    *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+    :root{--black:#0d0d0d;--white:#f5f2ed;--accent:#c0392b;--green:#1a6641;--mid:#6b6560;--border:#d4cfc9;--input-bg:#edeae4}
+    html,body{height:100%}
+    body{background:var(--white);color:var(--black);font-family:'DM Mono',monospace;display:grid;grid-template-columns:1fr 1fr;min-height:100vh}
+    .panel-left{background:var(--black);color:var(--white);display:flex;flex-direction:column;justify-content:space-between;padding:56px 52px;position:relative;overflow:hidden}
+    .panel-left::before{content:'';position:absolute;top:-120px;left:-80px;width:420px;height:420px;border-radius:50%;border:1px solid rgba(245,242,237,.07)}
+    .panel-left::after{content:'';position:absolute;bottom:-60px;right:-100px;width:300px;height:300px;border-radius:50%;border:1px solid rgba(245,242,237,.05)}
+    .brand{position:relative;z-index:1}
+    .brand-tag{font-size:10px;letter-spacing:.18em;text-transform:uppercase;color:rgba(245,242,237,.4);margin-bottom:18px}
+    .brand-name{font-family:'DM Serif Display',serif;font-size:2.6rem;line-height:1.1;color:var(--white)}
+    .brand-name em{font-style:italic;color:rgba(245,242,237,.45)}
+    .panel-info{position:relative;z-index:1}
+    .info-block{border-top:1px solid rgba(245,242,237,.12);padding-top:24px;margin-bottom:18px}
+    .info-label{font-size:9px;letter-spacing:.2em;text-transform:uppercase;color:rgba(245,242,237,.35);margin-bottom:6px}
+    .info-value{font-size:12px;color:rgba(245,242,237,.65);line-height:1.7}
+    .flow{margin-top:14px;display:flex;flex-direction:column}
+    .fstep{display:flex;gap:10px;align-items:flex-start;position:relative}
+    .fstep:not(:last-child)::after{content:'';position:absolute;left:9px;top:20px;width:1px;height:calc(100% + 2px);background:rgba(245,242,237,.12)}
+    .fdot{width:18px;height:18px;border-radius:50%;border:1px solid rgba(245,242,237,.2);display:flex;align-items:center;justify-content:center;flex-shrink:0;margin-top:2px}
+    .fdot-i{width:5px;height:5px;border-radius:50%;background:var(--accent)}
+    .ftext{font-size:11px;color:rgba(245,242,237,.5);line-height:1.5;padding-bottom:14px}
+    .ftext strong{color:rgba(245,242,237,.8);font-weight:500}
+    .panel-footer{font-size:10px;color:rgba(245,242,237,.2);letter-spacing:.06em;position:relative;z-index:1}
+    .panel-right{display:flex;align-items:center;justify-content:center;padding:60px 64px}
+    .form-wrapper{width:100%;max-width:380px;animation:fadeUp .5s ease both}
+    @keyframes fadeUp{from{opacity:0;transform:translateY(18px)}to{opacity:1;transform:translateY(0)}}
+    .form-header{margin-bottom:32px}
+    .form-header h1{font-family:'DM Serif Display',serif;font-size:2rem;font-weight:400;color:var(--black);margin-bottom:8px}
+    .form-header p{font-size:11.5px;color:var(--mid);line-height:1.6}
+    .form-group{margin-bottom:20px}
+    label{display:block;font-size:10px;letter-spacing:.16em;text-transform:uppercase;color:var(--mid);margin-bottom:8px}
+    input[type=text],input[type=password]{width:100%;background:var(--input-bg);border:1.5px solid transparent;border-bottom-color:var(--border);padding:13px 16px;font-family:'DM Mono',monospace;font-size:13px;color:var(--black);outline:none;transition:border-color .2s,background .2s}
+    input:focus{border-color:var(--black);background:#e8e4de}
+    input::placeholder{color:#b0aba5;font-size:12px}
+    .btn-primary{width:100%;background:var(--black);color:var(--white);border:none;padding:15px 20px;font-family:'DM Mono',monospace;font-size:11px;letter-spacing:.14em;text-transform:uppercase;cursor:pointer;transition:background .2s;margin-top:8px;position:relative;overflow:hidden}
+    .btn-primary:hover:not(:disabled){background:#1f1f1f}
+    .btn-primary:disabled{opacity:.6;cursor:not-allowed}
+    .btn-bar{position:absolute;bottom:0;left:0;height:2px;background:var(--accent);width:0;transition:width .5s ease}
+    .alert{display:none;background:#fdf0ee;border-left:3px solid var(--accent);padding:12px 16px;font-size:11.5px;color:var(--accent);margin-bottom:22px}
+    .demo-box{margin-top:24px;border:1px dashed var(--border);padding:16px 18px;border-radius:3px}
+    .demo-title{font-size:9px;letter-spacing:.18em;text-transform:uppercase;color:var(--mid);margin-bottom:6px}
+    .demo-hint{font-size:10px;color:#b0aba5;margin-bottom:10px;font-style:italic}
+    .demo-row{display:flex;justify-content:space-between;align-items:center;font-size:11px;padding:7px 8px;border-radius:2px;cursor:pointer;transition:background .1s}
+    .demo-row:hover{background:#ede9e3}
+    .badge{font-size:9px;letter-spacing:.08em;text-transform:uppercase;padding:2px 7px;border-radius:2px}
+    .badge-p{background:rgba(192,57,43,.1);color:var(--accent)}
+    .badge-s{background:rgba(26,102,65,.1);color:var(--green)}
+    @media(max-width:768px){body{grid-template-columns:1fr}.panel-left{display:none}.panel-right{padding:40px 28px}}
+  </style>
+</head>
+<body>
+  <div class="panel-left">
+    <div class="brand">
+      <div class="brand-tag">PCTO 2025/26 — 5FI</div>
+      <div class="brand-name">Prenotazione<br><em>Laboratori</em></div>
+    </div>
+    <div class="panel-info">
+      <div class="info-block">
+        <div class="info-label">Flusso di accesso</div>
+        <div class="flow">
+          <div class="fstep"><div class="fdot"><div class="fdot-i"></div></div><div class="ftext"><strong>Credenziali</strong> del registro elettronico scolastico</div></div>
+          <div class="fstep"><div class="fdot"><div class="fdot-i"></div></div><div class="ftext"><strong>Verifica</strong> tramite servizio scolastico d'istituto</div></div>
+          <div class="fstep"><div class="fdot"><div class="fdot-i"></div></div><div class="ftext"><strong>Ruolo rilevato</strong> automaticamente — studente o professore</div></div>
+          <div class="fstep"><div class="fdot"><div class="fdot-i"></div></div><div class="ftext"><strong>Dashboard</strong> adeguata al ruolo ricevuto</div></div>
+        </div>
+      </div>
+      <div class="info-block">
+        <div class="info-label">Nessuna registrazione</div>
+        <div class="info-value">Gli account sono gestiti dall'istituto. Usa le credenziali già in tuo possesso per il registro elettronico.</div>
+      </div>
+    </div>
+    <div class="panel-footer">Tarbacea · Wu · Sellam — Classe 5FI — Istituto Terranova</div>
+  </div>
+
+  <div class="panel-right">
+    <div class="form-wrapper">
+      <div class="form-header">
+        <h1>Accedi</h1>
+        <p>Inserisci le credenziali del registro elettronico scolastico.</p>
+      </div>
+      <div class="alert" id="alert"></div>
+      <form id="form" novalidate>
+        <div class="form-group">
+          <label for="usr">Nome utente</label>
+          <input type="text" id="usr" placeholder="nome.cognome" autocomplete="username" required>
+        </div>
+        <div class="form-group">
+          <label for="pwd">Password</label>
+          <input type="password" id="pwd" placeholder="••••••••" autocomplete="current-password" required>
+        </div>
+        <button type="submit" class="btn-primary" id="btn">
+          <span id="btn-text">Accedi tramite registro scolastico</span>
+          <div class="btn-bar" id="bar"></div>
+        </button>
+      </form>
+
+      <div class="demo-box">
+        <div class="demo-title">Credenziali demo</div>
+        <div class="demo-hint">Clicca su una riga per compilare il form</div>
+        <div class="demo-row" onclick="fill('marco.rossi','Temp1234!')">
+          <span>marco.rossi / Temp1234!</span><span class="badge badge-p">Professore</span>
+        </div>
+        <div class="demo-row" onclick="fill('luca.ferrari','Temp5678!')">
+          <span>luca.ferrari / Temp5678!</span><span class="badge badge-s">Studente</span>
+        </div>
+        <div class="demo-row" onclick="fill('sara.esposito','Temp9012!')">
+          <span>sara.esposito / Temp9012!</span><span class="badge badge-s">Studente</span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    const USERS=[
+      {id:1,username:'marco.rossi',  password:'Temp1234!',nome:'Marco',cognome:'Rossi',   email:'marco.rossi@scuola.it',  ruolo:'professore',classe:null, materie:['Informatica','Sistemi e Reti']},
+      {id:2,username:'luca.ferrari', password:'Temp5678!',nome:'Luca', cognome:'Ferrari', email:'luca.ferrari@scuola.it', ruolo:'studente',  classe:'5FI',materie:null},
+      {id:3,username:'sara.esposito',password:'Temp9012!',nome:'Sara', cognome:'Esposito',email:'sara.esposito@scuola.it',ruolo:'studente',  classe:'5FI',materie:null}
+    ];
+
+    function fill(u,p){document.getElementById('usr').value=u;document.getElementById('pwd').value=p;}
+
+    document.getElementById('form').addEventListener('submit',async function(e){
+      e.preventDefault();
+      const alertEl=document.getElementById('alert');alertEl.style.display='none';
+      const usr=document.getElementById('usr').value.trim().toLowerCase();
+      const pwd=document.getElementById('pwd').value;
+      if(!usr||!pwd){alertEl.textContent='Compila tutti i campi.';alertEl.style.display='block';return;}
+      const btn=document.getElementById('btn');
+      const btnTxt=document.getElementById('btn-text');
+      const bar=document.getElementById('bar');
+      btn.disabled=true;btnTxt.textContent='Connessione in corso…';bar.style.width='0%';
+      await delay(300);bar.style.width='50%';
+      await delay(500);bar.style.width='90%';
+      await delay(200);
+      const u=USERS.find(x=>x.username===usr&&x.password===pwd);
+      if(!u){
+        alertEl.textContent='Credenziali non riconosciute dal servizio scolastico.';
+        alertEl.style.display='block';
+        btn.disabled=false;btnTxt.textContent='Accedi tramite registro scolastico';bar.style.width='0%';
+        return;
+      }
+      bar.style.width='100%';
+      sessionStorage.setItem('utente',JSON.stringify(u));
+      btnTxt.textContent='✓ Accesso effettuato';
+      await delay(400);
+      window.location.href=u.ruolo==='professore'?'dashboard-professore.html':'dashboard-studente.html';
+    });
+
+    function delay(ms){return new Promise(r=>setTimeout(r,ms));}
+  </script>
+</body>
+</html>
