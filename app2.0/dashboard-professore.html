@@ -1,0 +1,413 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+  <meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>Dashboard Professore — Prenotazione Laboratori</title>
+  <link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+  <style>
+    *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+    :root{--black:#0d0d0d;--white:#f5f2ed;--accent:#c0392b;--green:#1a6641;--mid:#6b6560;--border:#d4cfc9;--sidebar:260px;--light:#f9f8f6}
+    html,body{height:100%;background:var(--white);color:var(--black);font-family:'DM Mono',monospace}
+    .app{display:grid;grid-template-columns:var(--sidebar) 1fr;min-height:100vh}
+
+    aside{background:var(--black);color:var(--white);padding:36px 24px;display:flex;flex-direction:column;gap:36px}
+    .sb-brand .tag{font-size:9px;letter-spacing:.2em;text-transform:uppercase;color:rgba(245,242,237,.35);margin-bottom:10px}
+    .sb-brand h2{font-family:'DM Serif Display',serif;font-size:1.2rem;font-weight:400;color:var(--white);line-height:1.25}
+    .sb-brand h2 em{font-style:italic;color:rgba(245,242,237,.4)}
+    .sb-user{background:rgba(245,242,237,.07);border-radius:3px;padding:12px 14px}
+    .sb-user-name{font-size:12px;color:var(--white);font-weight:500}
+    .sb-user-role{font-size:9px;letter-spacing:.12em;text-transform:uppercase;color:var(--accent);margin-top:2px}
+    .sb-user-sub{font-size:10px;color:rgba(245,242,237,.45);margin-top:4px;line-height:1.5}
+    nav ul{list-style:none;display:flex;flex-direction:column;gap:2px}
+    nav a{display:flex;align-items:center;gap:10px;padding:9px 12px;font-size:11px;letter-spacing:.05em;color:rgba(245,242,237,.5);text-decoration:none;border-radius:2px;transition:background .15s,color .15s}
+    nav a:hover,nav .active a{background:rgba(245,242,237,.08);color:var(--white)}
+    .dot{width:5px;height:5px;background:var(--accent);border-radius:50%;flex-shrink:0}
+    .sb-bottom{margin-top:auto;border-top:1px solid rgba(245,242,237,.1);padding-top:20px}
+    .sb-bottom a{display:flex;align-items:center;gap:10px;padding:9px 12px;font-size:11px;color:rgba(245,242,237,.4);text-decoration:none;border-radius:2px;transition:color .15s}
+    .sb-bottom a:hover{color:rgba(245,242,237,.7)}
+
+    main{background:var(--light);padding:40px 48px;overflow-y:auto;display:flex;flex-direction:column;gap:32px}
+    .page-title{font-family:'DM Serif Display',serif;font-size:2rem;color:var(--black);margin-bottom:4px}
+    .page-sub{font-size:11.5px;color:var(--mid)}
+
+    .stats{display:grid;grid-template-columns:repeat(4,1fr);gap:14px}
+    .stat{background:var(--white);border:1px solid var(--border);border-radius:3px;padding:18px 20px}
+    .stat-label{font-size:9px;letter-spacing:.18em;text-transform:uppercase;color:var(--mid);margin-bottom:6px}
+    .stat-val{font-family:'DM Serif Display',serif;font-size:1.8rem;color:var(--black);line-height:1}
+    .stat-sub{font-size:10px;color:var(--mid);margin-top:3px}
+
+    /* lab timeline oggi */
+    .timeline-grid{display:grid;grid-template-columns:1fr 1fr;gap:16px}
+    .tlab{background:var(--white);border:1px solid var(--border);border-radius:3px;padding:20px 22px}
+    .tlab-name{font-family:'DM Serif Display',serif;font-size:1.1rem;margin-bottom:4px}
+    .tlab-sub{font-size:10px;color:var(--mid);margin-bottom:14px}
+    .timeline{position:relative;height:40px;background:#ede9e3;border-radius:3px;overflow:hidden}
+    .tblock{position:absolute;top:4px;height:32px;border-radius:2px;display:flex;align-items:center;justify-content:center;font-size:9px;letter-spacing:.05em;white-space:nowrap;overflow:hidden;padding:0 4px}
+    .tblock-green{background:rgba(26,102,65,.2);color:var(--green)}
+    .tblock-red{background:rgba(192,57,43,.15);color:var(--accent)}
+    .timeline-hours{display:flex;justify-content:space-between;font-size:9px;color:var(--mid);margin-top:4px;padding:0 2px}
+
+    .section{background:var(--white);border:1px solid var(--border);border-radius:3px;padding:28px 32px}
+    .sec-header{display:flex;justify-content:space-between;align-items:center;margin-bottom:20px;gap:12px;flex-wrap:wrap}
+    .sec-title{font-family:'DM Serif Display',serif;font-size:1.3rem;color:var(--black)}
+    .filters{display:flex;gap:8px;align-items:center;flex-wrap:wrap}
+    select{background:var(--light);border:1px solid var(--border);padding:7px 10px;font-family:'DM Mono',monospace;font-size:11px;color:var(--black);outline:none;cursor:pointer;border-radius:2px}
+    select:focus{border-color:var(--black)}
+
+    table{width:100%;border-collapse:collapse;font-size:11.5px}
+    thead{border-bottom:2px solid var(--border)}
+    th{padding:10px 12px;text-align:left;font-weight:500;font-size:10px;letter-spacing:.06em;text-transform:uppercase;color:var(--black)}
+    tbody tr{border-bottom:1px solid var(--border);transition:background .12s}
+    tbody tr:last-child{border-bottom:none}
+    tbody tr:hover{background:var(--light)}
+    td{padding:11px 12px;vertical-align:middle}
+    .td-lab{font-family:'DM Serif Display',serif;font-size:13px}
+    .td-sub{font-size:10px;color:var(--mid);margin-top:1px}
+    .badge{display:inline-block;padding:3px 8px;border-radius:2px;font-size:9px;letter-spacing:.08em;text-transform:uppercase}
+    .badge-green{background:rgba(26,102,65,.1);color:var(--green)}
+    .badge-red{background:rgba(192,57,43,.1);color:var(--accent)}
+    .badge-gray{background:rgba(107,101,96,.1);color:var(--mid)}
+    .badge-warn{background:rgba(230,126,34,.15);color:#c0772b}
+    .actions{display:flex;gap:6px;align-items:center}
+    .btn-icon{background:transparent;border:1px solid var(--border);padding:5px 9px;font-family:'DM Mono',monospace;font-size:9px;letter-spacing:.07em;text-transform:uppercase;cursor:pointer;border-radius:2px;transition:all .15s}
+    .btn-icon:hover{border-color:var(--accent);color:var(--accent)}
+    .btn-icon-danger{border-color:rgba(192,57,43,.3);color:var(--accent)}
+    .btn-icon-danger:hover{background:var(--accent);color:var(--white)}
+    .btn-sm{background:var(--black);color:var(--white);border:none;padding:9px 16px;font-family:'DM Mono',monospace;font-size:10px;letter-spacing:.1em;text-transform:uppercase;cursor:pointer;text-decoration:none;display:inline-block;border-radius:2px;transition:background .2s}
+    .btn-sm:hover{background:#1f1f1f}
+
+    /* messages */
+    .msg-form textarea{width:100%;background:var(--light);border:1.5px solid var(--border);padding:12px 14px;font-family:'DM Mono',monospace;font-size:12px;color:var(--black);outline:none;resize:vertical;min-height:80px;border-radius:2px;transition:border-color .2s}
+    .msg-form textarea:focus{border-color:var(--black)}
+    .msg-form-row{display:flex;gap:10px;align-items:flex-end;margin-top:10px;flex-wrap:wrap}
+    .msg-form label{font-size:10px;letter-spacing:.14em;text-transform:uppercase;color:var(--mid);display:block;margin-bottom:6px}
+    .msg-form .field{flex:1;min-width:160px}
+    .msg-form input[type=text]{width:100%;background:var(--light);border:1.5px solid var(--border);padding:10px 12px;font-family:'DM Mono',monospace;font-size:12px;color:var(--black);outline:none;border-radius:2px;transition:border-color .2s}
+    .msg-form input:focus{border-color:var(--black)}
+    .msg-sent{display:flex;flex-direction:column;gap:10px;margin-top:20px}
+    .msg{background:var(--light);border:1px solid var(--border);border-radius:3px;padding:14px 16px}
+    .msg-header{display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:6px}
+    .msg-to{font-size:10px;color:var(--mid)}
+    .msg-time{font-size:10px;color:var(--mid)}
+    .msg-body{font-size:12px;color:var(--black);line-height:1.6}
+    .msg-broadcast{border-left:3px solid var(--green)}
+    .msg-single{border-left:3px solid var(--accent)}
+    .empty{text-align:center;padding:32px;color:var(--mid);font-size:12px}
+
+    /* MODAL annullamento */
+    .modal-backdrop{display:none;position:fixed;inset:0;background:rgba(13,13,13,.65);z-index:100;align-items:center;justify-content:center}
+    .modal-backdrop.open{display:flex}
+    .modal{background:var(--white);border:1px solid var(--border);border-radius:4px;padding:32px;max-width:460px;width:92%;animation:fadeUp .3s ease}
+    @keyframes fadeUp{from{opacity:0;transform:translateY(12px)}to{opacity:1;transform:translateY(0)}}
+    .modal h3{font-family:'DM Serif Display',serif;font-size:1.4rem;margin-bottom:8px}
+    .modal p{font-size:12px;color:var(--mid);line-height:1.6;margin-bottom:16px}
+    .modal label{font-size:10px;letter-spacing:.14em;text-transform:uppercase;color:var(--mid);display:block;margin-bottom:6px}
+    .modal textarea{width:100%;background:var(--light);border:1.5px solid var(--border);padding:10px 12px;font-family:'DM Mono',monospace;font-size:12px;color:var(--black);outline:none;resize:vertical;min-height:70px;border-radius:2px;transition:border-color .2s}
+    .modal textarea:focus{border-color:var(--black)}
+    .modal-actions{display:flex;gap:10px;justify-content:flex-end;margin-top:18px}
+    .btn-danger{background:var(--accent);color:var(--white);border:none;padding:10px 18px;font-family:'DM Mono',monospace;font-size:10px;letter-spacing:.1em;text-transform:uppercase;cursor:pointer;border-radius:2px;transition:background .2s}
+    .btn-danger:hover{background:#a93226}
+    .btn-ghost{background:transparent;border:1px solid var(--border);padding:8px 16px;font-family:'DM Mono',monospace;font-size:10px;letter-spacing:.1em;text-transform:uppercase;cursor:pointer;border-radius:2px;transition:border-color .2s}
+    .btn-ghost:hover{border-color:var(--black)}
+    .alert-sm{background:#fdf0ee;border-left:3px solid var(--accent);padding:8px 12px;font-size:11px;color:var(--accent);display:none;margin-top:8px}
+
+    @media(max-width:1100px){.stats{grid-template-columns:repeat(2,1fr)}.timeline-grid{grid-template-columns:1fr}}
+    @media(max-width:900px){.app{grid-template-columns:1fr}aside{display:none}main{padding:24px}}
+  </style>
+</head>
+<body>
+<div class="app">
+  <aside>
+    <div class="sb-brand">
+      <div class="tag">Sistema Laboratori</div>
+      <h2>Gestione<br><em>Laboratori</em></h2>
+    </div>
+    <div class="sb-user">
+      <div class="sb-user-name" id="sb-nome">—</div>
+      <div class="sb-user-role">Professore</div>
+      <div class="sb-user-sub" id="sb-materie">—</div>
+    </div>
+    <nav>
+      <ul>
+        <li class="active"><a href="dashboard-professore.html"><span class="dot"></span>Pannello di controllo</a></li>
+        <li><a href="orario.html"><span class="dot"></span>Orari Laboratori</a></li>
+      </ul>
+    </nav>
+    <div class="sb-bottom">
+      <a href="login.html" onclick="sessionStorage.clear()"><span class="dot"></span>Esci</a>
+    </div>
+  </aside>
+
+  <main>
+    <div>
+      <div class="page-title" id="welcome-title">Pannello di controllo</div>
+      <div class="page-sub" id="welcome-sub">—</div>
+    </div>
+
+    <div class="stats" id="stats-row"></div>
+
+    <!-- Timeline oggi -->
+    <div class="section">
+      <div class="sec-header"><div class="sec-title">Situazione laboratori — oggi</div></div>
+      <div class="timeline-grid" id="timeline-grid"></div>
+    </div>
+
+    <!-- Tutte le prenotazioni -->
+    <div class="section">
+      <div class="sec-header">
+        <div class="sec-title">Tutte le prenotazioni</div>
+        <div class="filters">
+          <select id="filter-lab" onchange="renderTable()">
+            <option value="">Tutti i laboratori</option>
+            <option value="1">Lab Informatica A</option>
+            <option value="2">Lab Fisica</option>
+          </select>
+          <select id="filter-stato" onchange="renderTable()">
+            <option value="attiva">Solo attive</option>
+            <option value="">Tutte</option>
+            <option value="annullata">Annullate</option>
+          </select>
+        </div>
+      </div>
+      <div id="table-container"></div>
+    </div>
+
+    <!-- Messaggi -->
+    <div class="section">
+      <div class="sec-header"><div class="sec-title">Invia messaggio agli studenti</div></div>
+      <div class="msg-form">
+        <label>Messaggio</label>
+        <textarea id="msg-body" placeholder="Scrivi un messaggio per gli studenti…"></textarea>
+        <div id="msg-err" class="alert-sm"></div>
+        <div class="msg-form-row">
+          <div class="field">
+            <label>Destinatario</label>
+            <select id="msg-dest" style="width:100%">
+              <option value="">Tutti gli studenti (broadcast)</option>
+              <option value="luca.ferrari@scuola.it">Luca Ferrari</option>
+              <option value="sara.esposito@scuola.it">Sara Esposito</option>
+            </select>
+          </div>
+          <button class="btn-sm" onclick="sendMsg()">Invia messaggio</button>
+        </div>
+      </div>
+      <div class="msg-sent" id="msg-sent"></div>
+    </div>
+  </main>
+</div>
+
+<!-- Modal annullamento -->
+<div class="modal-backdrop" id="cancel-modal">
+  <div class="modal">
+    <h3>Annulla prenotazione</h3>
+    <p id="cancel-info">—</p>
+    <label>Motivo dell'annullamento <span style="color:var(--accent)">*</span></label>
+    <textarea id="cancel-reason" placeholder="Es: guasto al banco di misura, conflitto di orario, manutenzione programmata…"></textarea>
+    <div id="cancel-err" class="alert-sm"></div>
+    <div class="modal-actions">
+      <button class="btn-ghost" onclick="closeCancel()">Annulla</button>
+      <button class="btn-danger" onclick="confirmCancel()">Conferma annullamento</button>
+    </div>
+  </div>
+</div>
+
+<script>
+// ── SHARED DATA ──────────────────────────────────────────────────────────────
+const LABS=[
+  {id:1,nome:'Lab Informatica A',capienza:25,posizione:'Piano 1, Ala Nord',max_ore_giorno:3,max_ore_settimana:8,anticipo_min_giorni:1,richiede_docente:false},
+  {id:2,nome:'Lab Fisica',       capienza:18,posizione:'Piano 2, Ala Est', max_ore_giorno:3,max_ore_settimana:9,anticipo_min_giorni:2,richiede_docente:true}
+];
+const ALL_USERS=[
+  {id:2,nome:'Luca',cognome:'Ferrari',email:'luca.ferrari@scuola.it',classe:'5FI'},
+  {id:3,nome:'Sara',cognome:'Esposito',email:'sara.esposito@scuola.it',classe:'5FI'}
+];
+const KB='spl_bookings',KM='spl_messages';
+function getB(){return JSON.parse(localStorage.getItem(KB)||'[]');}
+function setB(v){localStorage.setItem(KB,JSON.stringify(v));}
+function getM(){return JSON.parse(localStorage.getItem(KM)||'[]');}
+function setM(v){localStorage.setItem(KM,JSON.stringify(v));}
+function labById(id){return LABS.find(l=>l.id===id);}
+function fmtIT(s){if(!s)return'—';const[y,m,d]=s.split('-');return d+'/'+m+'/'+y;}
+function hDiff(a,b){const[ah,am]=a.split(':').map(Number);const[bh,bm]=b.split(':').map(Number);return(bh+bm/60)-(ah+am/60);}
+function weekBounds(dateStr){const d=new Date(dateStr);const mon=new Date(d);mon.setDate(d.getDate()-((d.getDay()+6)%7));const sun=new Date(mon);sun.setDate(mon.getDate()+6);return[mon.toISOString().slice(0,10),sun.toISOString().slice(0,10)];}
+function dayName(str){const days=['Dom','Lun','Mar','Mer','Gio','Ven','Sab'];return days[new Date(str+'T12:00:00').getDay()];}
+function initData(){
+  if(localStorage.getItem(KB)!==null)return;
+  const today=new Date();
+  function wd(n){let d=new Date(today);d.setDate(d.getDate()+n);while(d.getDay()===0||d.getDay()===6)d.setDate(d.getDate()+1);return d.toISOString().slice(0,10);}
+  setB([
+    {id:1,id_utente:2,id_lab:1,data:wd(2),ora_inizio:'09:00',ora_fine:'11:00',stato:'attiva',note:'Esercitazioni Python',creata_il:new Date().toISOString(),classe:'5FI',nome_utente:'Luca Ferrari'},
+    {id:2,id_utente:3,id_lab:1,data:wd(3),ora_inizio:'14:00',ora_fine:'16:00',stato:'attiva',note:'Relazione reti',creata_il:new Date().toISOString(),classe:'5FI',nome_utente:'Sara Esposito'},
+    {id:3,id_utente:2,id_lab:2,data:wd(4),ora_inizio:'09:00',ora_fine:'11:00',stato:'attiva',note:'Circuiti RC',creata_il:new Date().toISOString(),classe:'5FI',nome_utente:'Luca Ferrari'},
+    {id:4,id_utente:3,id_lab:1,data:wd(7),ora_inizio:'11:00',ora_fine:'13:00',stato:'attiva',note:'Test di rete',creata_il:new Date().toISOString(),classe:'5FI',nome_utente:'Sara Esposito'},
+  ]);
+  setM([{id:1,id_prenotazione:null,autore:'Marco Rossi',dest_id:null,contenuto:'Portare le credenziali personali per accedere ai PC del Lab Informatica A.',data:new Date().toISOString(),broadcast:true}]);
+}
+
+// ── AUTH GUARD ────────────────────────────────────────────────────────────────
+const utente=JSON.parse(sessionStorage.getItem('utente')||'null');
+if(!utente||utente.ruolo!=='professore')window.location.href='login.html';
+initData();
+
+document.getElementById('sb-nome').textContent=utente.nome+' '+utente.cognome;
+document.getElementById('sb-materie').textContent=(utente.materie||[]).join(', ');
+document.getElementById('welcome-title').textContent='Buongiorno, Prof. '+utente.cognome;
+document.getElementById('welcome-sub').textContent=new Date().toLocaleDateString('it-IT',{weekday:'long',day:'numeric',month:'long',year:'numeric'});
+
+const today=new Date().toISOString().slice(0,10);
+const allB=getB();
+const [wStart,wEnd]=weekBounds(today);
+
+// ── STATS ─────────────────────────────────────────────────────────────────────
+function refreshStats(){
+  const bs=getB();
+  const todayB=bs.filter(b=>b.data===today&&b.stato==='attiva');
+  const weekB=bs.filter(b=>b.data>=wStart&&b.data<=wEnd&&b.stato==='attiva');
+  const annB=bs.filter(b=>b.stato==='annullata');
+  const pendDoc=bs.filter(b=>b.stato==='attiva'&&b.data>=today&&labById(b.id_lab)?.richiede_docente);
+  document.getElementById('stats-row').innerHTML=`
+    <div class="stat"><div class="stat-label">Prenotazioni oggi</div><div class="stat-val">${todayB.length}</div><div class="stat-sub">laboratori in uso</div></div>
+    <div class="stat"><div class="stat-label">Questa settimana</div><div class="stat-val">${weekB.length}</div><div class="stat-sub">prenotazioni attive</div></div>
+    <div class="stat"><div class="stat-label">Richiedono docente</div><div class="stat-val" style="color:var(--accent)">${pendDoc.length}</div><div class="stat-sub">da gestire</div></div>
+    <div class="stat"><div class="stat-label">Annullate totali</div><div class="stat-val" style="color:var(--mid)">${annB.length}</div><div class="stat-sub">storico</div></div>
+  `;
+}
+refreshStats();
+
+// ── TIMELINE OGGI ─────────────────────────────────────────────────────────────
+function renderTimeline(){
+  const bs=getB().filter(b=>b.data===today&&b.stato==='attiva');
+  const START=8,END=18,RANGE=END-START;
+  const grid=document.getElementById('timeline-grid');
+  grid.innerHTML='';
+  LABS.forEach(lab=>{
+    const labB=bs.filter(b=>b.id_lab===lab.id);
+    const hoursLabels=[...Array(RANGE+1)].map((_,i)=>`<span>${START+i}:00</span>`).join('');
+    let blocks='';
+    labB.forEach(b=>{
+      const[sh,sm]=b.ora_inizio.split(':').map(Number);
+      const[eh,em]=b.ora_fine.split(':').map(Number);
+      const left=((sh+sm/60-START)/RANGE)*100;
+      const width=((eh+em/60-(sh+sm/60))/RANGE)*100;
+      const isDoc=lab.richiede_docente;
+      blocks+=`<div class="tblock ${isDoc?'tblock-red':'tblock-green'}" style="left:${left}%;width:${width}%" title="${b.nome_utente} — ${b.ora_inizio}–${b.ora_fine}">${b.ora_inizio}–${b.ora_fine} ${b.classe}</div>`;
+    });
+    const isEmpty=labB.length===0;
+    grid.innerHTML+=`
+      <div class="tlab">
+        <div class="tlab-name">${lab.nome} ${lab.richiede_docente?'<span class="badge badge-warn">Richiede docente</span>':''}</div>
+        <div class="tlab-sub">${lab.posizione} · Capienza ${lab.capienza}</div>
+        <div class="timeline">${isEmpty?'<div style="position:absolute;inset:0;display:flex;align-items:center;justify-content:center;font-size:10px;color:#b0aba5">Nessuna prenotazione oggi</div>':blocks}</div>
+        <div class="timeline-hours">${hoursLabels}</div>
+      </div>`;
+  });
+}
+renderTimeline();
+
+// ── BOOKINGS TABLE ─────────────────────────────────────────────────────────────
+function renderTable(){
+  const labFilter=document.getElementById('filter-lab').value;
+  const statoFilter=document.getElementById('filter-stato').value;
+  let bs=getB();
+  if(labFilter)bs=bs.filter(b=>b.id_lab===parseInt(labFilter));
+  if(statoFilter)bs=bs.filter(b=>b.stato===statoFilter);
+  bs.sort((a,b)=>a.data.localeCompare(b.data)||a.ora_inizio.localeCompare(b.ora_inizio));
+  const container=document.getElementById('table-container');
+  if(bs.length===0){container.innerHTML='<div class="empty">Nessuna prenotazione trovata.</div>';return;}
+  let html=`<table><thead><tr><th>Laboratorio</th><th>Studente / Classe</th><th>Data</th><th>Orario</th><th>Note</th><th>Stato</th><th></th></tr></thead><tbody>`;
+  bs.forEach(b=>{
+    const lab=labById(b.id_lab);
+    const isPast=b.data<today;
+    const canCancel=b.stato==='attiva'&&!isPast;
+    const doc=lab?.richiede_docente&&b.stato==='attiva'&&!isPast;
+    html+=`<tr>
+      <td><div class="td-lab">${lab?.nome||'—'}</div><div class="td-sub">${lab?.posizione||''}</div></td>
+      <td><div style="font-size:12px">${b.nome_utente||'—'}</div><div class="td-sub">Classe ${b.classe||'—'}</div></td>
+      <td>${dayName(b.data)}<br><span style="font-size:10px;color:var(--mid)">${fmtIT(b.data)}</span></td>
+      <td style="white-space:nowrap">${b.ora_inizio}–${b.ora_fine}</td>
+      <td style="font-size:11px;color:var(--mid);max-width:150px">${b.note||'—'}</td>
+      <td>
+        <span class="badge ${b.stato==='attiva'?(isPast?'badge-gray':'badge-green'):'badge-red'}">${b.stato==='attiva'?(isPast?'conclusa':'attiva'):'annullata'}</span>
+        ${doc?'<br><span class="badge badge-warn" style="margin-top:3px">Docente req.</span>':''}
+      </td>
+      <td><div class="actions">${canCancel?`<button class="btn-icon btn-icon-danger" onclick="openCancel(${b.id})">Annulla</button>`:''}</div></td>
+    </tr>`;
+  });
+  html+=`</tbody></table>`;
+  container.innerHTML=html;
+}
+renderTable();
+
+// ── MESSAGES ──────────────────────────────────────────────────────────────────
+function renderMsgSent(){
+  const msgs=getM().filter(m=>m.autore===utente.nome+' '+utente.cognome);
+  const el=document.getElementById('msg-sent');
+  if(msgs.length===0){el.innerHTML='';return;}
+  el.innerHTML='<div style="font-size:10px;letter-spacing:.14em;text-transform:uppercase;color:var(--mid);margin-bottom:8px">Messaggi inviati</div>';
+  msgs.sort((a,b)=>new Date(b.data)-new Date(a.data)).forEach(m=>{
+    const cls=m.broadcast?'msg-broadcast':'msg-single';
+    el.innerHTML+=`
+      <div class="msg ${cls}">
+        <div class="msg-header">
+          <span class="msg-to">${m.broadcast?'→ Tutti gli studenti':'→ '+m.dest_name}</span>
+          <span class="msg-time">${new Date(m.data).toLocaleDateString('it-IT',{day:'numeric',month:'short',hour:'2-digit',minute:'2-digit'})}</span>
+        </div>
+        <div class="msg-body">${m.contenuto}</div>
+      </div>`;
+  });
+}
+renderMsgSent();
+
+function sendMsg(){
+  const body=document.getElementById('msg-body').value.trim();
+  const dest=document.getElementById('msg-dest').value;
+  const err=document.getElementById('msg-err');
+  err.style.display='none';
+  if(!body){err.textContent='Il messaggio non può essere vuoto.';err.style.display='block';return;}
+  const msgs=getM();
+  const destUser=ALL_USERS.find(u=>u.email===dest);
+  msgs.push({id:Date.now(),id_prenotazione:null,autore:utente.nome+' '+utente.cognome,dest_id:dest||null,dest_name:destUser?destUser.nome+' '+destUser.cognome:null,contenuto:body,data:new Date().toISOString(),broadcast:!dest});
+  setM(msgs);
+  document.getElementById('msg-body').value='';
+  document.getElementById('msg-dest').value='';
+  renderMsgSent();
+  refreshStats();
+}
+
+// ── CANCEL MODAL ──────────────────────────────────────────────────────────────
+let cancelId=null;
+function openCancel(id){
+  cancelId=id;
+  const b=getB().find(x=>x.id===id);
+  const lab=labById(b?.id_lab);
+  document.getElementById('cancel-info').textContent=`Prenotazione di ${b?.nome_utente} (Classe ${b?.classe}) — ${lab?.nome} — ${fmtIT(b?.data)} ore ${b?.ora_inizio}–${b?.ora_fine}.`;
+  document.getElementById('cancel-reason').value='';
+  document.getElementById('cancel-err').style.display='none';
+  document.getElementById('cancel-modal').classList.add('open');
+}
+function closeCancel(){document.getElementById('cancel-modal').classList.remove('open');cancelId=null;}
+function confirmCancel(){
+  const reason=document.getElementById('cancel-reason').value.trim();
+  const err=document.getElementById('cancel-err');
+  err.style.display='none';
+  if(!reason){err.textContent='Inserire obbligatoriamente il motivo dell\'annullamento.';err.style.display='block';return;}
+  const bs=getB();
+  const idx=bs.findIndex(b=>b.id===cancelId);
+  if(idx<0)return;
+  const b=bs[idx];
+  bs[idx].stato='annullata';
+  setB(bs);
+  // messaggio automatico allo studente
+  const msgs=getM();
+  msgs.push({id:Date.now(),id_prenotazione:cancelId,autore:utente.nome+' '+utente.cognome,dest_id:ALL_USERS.find(u=>u.id===b.id_utente)?.email||null,dest_name:b.nome_utente,contenuto:`La prenotazione del ${fmtIT(b.data)} ore ${b.ora_inizio}–${b.ora_fine} per ${labById(b.id_lab)?.nome} è stata annullata. Motivo: ${reason}`,data:new Date().toISOString(),broadcast:false});
+  setM(msgs);
+  closeCancel();
+  renderTable();
+  renderTimeline();
+  renderMsgSent();
+  refreshStats();
+}
+document.getElementById('cancel-modal').addEventListener('click',function(e){if(e.target===this)closeCancel();});
+</script>
+</body>
+</html>
