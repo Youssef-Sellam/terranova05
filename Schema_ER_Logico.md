@@ -24,32 +24,49 @@ COMMENTS(**id_commento**, contenuto, data_messaggio, id_prenotazione, id_autore,
 erDiagram
     direction LR
 
-    UTENTI ||--o{ SESSIONI : "1 : 0,N"
-    UTENTI ||--o{ PRENOTAZIONI : "1 : 0,N"
-    LABORATORI ||--o{ PRENOTAZIONI : "1 : 0,N"
-    PRENOTAZIONI ||--o{ COMMENTI : "1 : 0,N"
+    UTENTI ||--o{ SESSIONI : "1:N possiede"
+    UTENTI ||--o{ PRENOTAZIONI : "1:N effettua"
+    LABORATORI ||--o{ PRENOTAZIONI : "1:N viene prenotato da"
+    PRENOTAZIONI ||--o{ COMMENTI : "1:N riceve"
 
-    UTENTI ||--o{ COMMENTI : "1 : 0,N (autore)"
-    UTENTI ||--o{ COMMENTI : "1 : 0,N (destinatario)"
+    UTENTI ||--o{ COMMENTI : "1:N autore"
+    UTENTI ||--o{ COMMENTI : "1:N destinatario"
 
     UTENTI {
         int id_utente PK
+        string id_esterno
         string nome
         string cognome
         string email
+        string ruolo
+        string classe
+        boolean attivo
+        datetime creato_il
+        datetime aggiornato_il
     }
 
     SESSIONI {
         int id_sessione PK
-        string token
-        datetime scadenza
+        string token_locale
+        string token_servizio
+        string ip
+        string user_agent
+        datetime creata_il
+        datetime scade_il
+        boolean revocata
         int id_utente FK
     }
 
     LABORATORI {
         int id_lab PK
         string nome
+        string descrizione
         int capienza
+        string posizione
+        boolean attivo
+        int max_ore_giorno
+        int max_ore_settimana
+        int anticipo_min_giorni
     }
 
     PRENOTAZIONI {
@@ -57,6 +74,9 @@ erDiagram
         date data
         time ora_inizio
         time ora_fine
+        string stato
+        string note
+        datetime creata_il
         int id_utente FK
         int id_lab FK
     }
@@ -64,6 +84,7 @@ erDiagram
     COMMENTI {
         int id_commento PK
         text contenuto
+        datetime data_messaggio
         int id_prenotazione FK
         int id_autore FK
         int id_destinatario FK
