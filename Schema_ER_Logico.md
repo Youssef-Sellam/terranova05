@@ -24,21 +24,19 @@ COMMENTS(**id_commento**, contenuto, data_messaggio, id_prenotazione, id_autore,
 erDiagram
     direction LR
 
-    UTENTI ||--o{ SESSIONI : possiede
-    UTENTI ||--o{ PRENOTAZIONI : effettua
-    LABORATORI ||--o{ PRENOTAZIONI : ospita
+    UTENTI ||--o{ SESSIONI : "1 : 0,N"
+    UTENTI ||--o{ PRENOTAZIONI : "1 : 0,N"
+    LABORATORI ||--o{ PRENOTAZIONI : "1 : 0,N"
+    PRENOTAZIONI ||--o{ COMMENTI : "1 : 0,N"
 
-    PRENOTAZIONI ||--o{ COMMENTI : contiene
-
-    UTENTI ||--o{ COMMENTI : autore
-    UTENTI ||--o{ COMMENTI : destinatario
+    UTENTI ||--o{ COMMENTI : "1 : 0,N (autore)"
+    UTENTI ||--o{ COMMENTI : "1 : 0,N (destinatario)"
 
     UTENTI {
         int id_utente PK
         string nome
         string cognome
         string email
-        string ruolo
     }
 
     SESSIONI {
