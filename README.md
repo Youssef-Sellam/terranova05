@@ -39,7 +39,7 @@ progetto_terranova/
             login.html
                       |
                Backend / API
-                   (PHP )
+                   (PHP)
                       |
           ┌───────────┴───────────┐
           │                       │
