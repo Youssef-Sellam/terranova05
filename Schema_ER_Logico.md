@@ -1,17 +1,17 @@
 
 __**SCHEMA_LOGICO**__
 
-
+legenda: primary key *, Foreign Key **
 ```
-UTENTI(**id_utente**, id_esterno, nome, cognome, email, ruolo, classe, attivo, creato_il, aggiornato_il)
+UTENTI(*id_utente*, id_esterno, nome, cognome, email, ruolo, classe, attivo, creato_il, aggiornato_il)
 
-SESSIONI(**id_sessione**, token_locale, token_servizio, ip, user_agent, creata_il, scade_il, revocata, id_utente)
+SESSIONI(*id_sessione*, token_locale, token_servizio, ip, user_agent, creata_il, scade_il, revocata, **id_utente**)
 
-LABORATORI(**id_lab**, nome, descrizione, capienza, posizione, attivo, max_ore_giorno, max_ore_settimana, anticipo_min_giorni)
+LABORATORI(*id_lab*, nome, descrizione, capienza, posizione, attivo, max_ore_giorno, max_ore_settimana, anticipo_min_giorni)
 
-PRENOTAZIONI(**id_prenotazione**, data, ora_inizio, ora_fine, stato, note, creata_il, id_utente, id_lab)
+PRENOTAZIONI(*id_prenotazione*, data, ora_inizio, ora_fine, stato, note, creata_il, **id_utente**, **id_lab**)
 
-COMMENTS(**id_commento**, contenuto, data_messaggio, id_prenotazione, id_autore, id_destinatario)
+COMMENTI(*id_commento*, contenuto, data_messaggio, **id_prenotazione**, **id_autore**, **id_destinatario**)
 ```
 ----
 
