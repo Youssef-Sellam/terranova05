@@ -14,15 +14,16 @@ Sistema web per la prenotazione dei laboratori scolastici. L'accesso avviene tra
 ## File del progetto
 
 ```
-pctp_progetto/
+progetto_terranova/
 ├── index.html            Home page del sistema con link a login/orari
 ├── login.html            Pagina di accesso tramite servizio scolastico terzo
 ├── orario.html           Visualizzazione degli orari dei laboratori
-├── database.sql          Schema database e dati iniziali
-└── README.md             Questo file
+├── prenotazione.html     la pagina dove prenotare i laboratori
+├── dashboard-professore.html    la page del professore dopo essere acceduto
+├── dashboard-studente.html      la page dello studente dopo essere acceduto
 ```
 
-> `register.html` è stato rimosso: gli utenti non si registrano localmente. Il profilo viene creato/aggiornato automaticamente al primo login tramite l'API del registro scolastico.
+> `register.html`gli utenti non si registrano localmente. Il profilo viene creato/aggiornato automaticamente al primo login tramite l'API del registro scolastico.
 
 ---
 
@@ -50,7 +51,7 @@ pctp_progetto/
                         (cache profilo)  (token)              comments
 ```
 
-Il **backend PHP** fa da adapter: riceve le credenziali dal browser, le inoltrano all'API del registro scolastico dell'istituto, normalizza la risposta e crea la sessione locale.
+Il **backend PHP** fa da adapter: riceve le credenziali dal browser, le inoltra all'API del registro scolastico dell'istituto, normalizza la risposta e crea la sessione locale.
 
 ---
 
@@ -230,15 +231,6 @@ Messaggi professore ↔ studente
 ```
 
 ---
-
-
-
-## Avvio su XAMPP
-
-1. Avviare Apache e MySQL dal pannello XAMPP
-2. Copiare la cartella in `htdocs/pctp_progetto/`
-3. Importare `database.sql` da phpMyAdmin (Importa → Scegli file → Esegui)
-4. Aprire `http://localhost/pctp_progetto/index.html`
 
 **Credenziali di test (simulazione servizio scolastico):**
 
